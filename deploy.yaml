@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: CI_COMMIT_REF_NAME
+  name: CI_PROJECT_NAME
 spec:
   replicas: 1
   revisionHistoryLimit: 5
   selector:
     matchLabels:
-      app: CI_COMMIT_REF_NAME
+      app: CI_PROJECT_NAME
   template:
     metadata:
       annotations:
         kubernetes.io/change-cause: "CI_COMMIT_SHORT_SHA"
       labels:
-        app: CI_COMMIT_REF_NAME
+        app: CI_PROJECT_NAME
     spec:
       containers:
-        - name: CI_COMMIT_REF_NAME
+        - name: CI_PROJECT_NAME
           image: jonascavalcantineto/CI_PROJECT_NAME:CI_COMMIT_REF_NAME
           imagePullPolicy: Always
           resources:
@@ -29,18 +29,18 @@ spec:
           ports:
           - name: pback-8080
             containerPort: 8080
-      # nodeSelector:
-      #   node-role.kubernetes.io/prod: ""
+      nodeSelector:
+        node-role.kubernetes.io/CI_COMMIT_REF_NAME: ""
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: CI_COMMIT_REF_NAME
+  name: CI_PROJECT_NAME
 spec:
   selector:
-    app: CI_COMMIT_REF_NAME
+    app: CI_PROJECT_NAME
   ports:
     - name: pback-8080
       protocol: TCP
@@ -53,19 +53,19 @@ spec:
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: CI_COMMIT_REF_NAME
+  name: CI_PROJECT_NAME
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
   labels:
-    app: CI_COMMIT_REF_NAME
+    app: CI_PROJECT_NAME
 spec:
   rules:
     - http:
         paths:
           - path: /*
             backend:
-              serviceName: CI_COMMIT_REF_NAME
+              serviceName: CI_PROJECT_NAME
               servicePort: 8080
 
 ---
@@ -73,12 +73,12 @@ spec:
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: CI_COMMIT_REF_NAME
+  name: CI_PROJECT_NAME
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: CI_COMMIT_REF_NAME
+    name: CI_PROJECT_NAME
   minReplicas: 1
   maxReplicas: 2
   metrics:
