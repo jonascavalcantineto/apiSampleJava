@@ -1,0 +1,53 @@
+image: maven:3.6.3-openjdk-8 
+
+variables:
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository/
+    - target/
+
+stages:
+  - test
+  - image
+  - deploy
+
+code test:
+  stage: test
+  script:
+    - mvn $MAVEN_CLI_OPTS test
+
+build:
+  stage: image
+  image: docker:18.09.7
+  services:
+  - docker:18.09.7-dind
+  script:
+    - sed -i "s/CI_COMMIT_REF_NAME/$CI_COMMIT_REF_NAME/g" Dockerfile
+    - docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD
+    - docker build -t $REGISTRY_HOST/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME .
+    - docker push $REGISTRY_HOST/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
+  only:
+    - qa
+    - production
+    
+deploy:
+  stage: deploy
+  image: dtzar/helm-kubectl
+  script:
+    - apk add --update coreutils
+    - kubectl config set-cluster k8s --server=$KUBE_URL --certificate-authority=$KUBE_CA_PEM_FILE
+    - kubectl config set-credentials gitlab --token=$kube_sa_deploy_admin_prod_token
+    - kubectl config set-context default --cluster=k8s --user=gitlab
+    - kubectl config use-context default
+    - sed -i "s/CI_PROJECT_NAME/$CI_PROJECT_NAME/g" deployment.yaml
+    - sed -i "s/CI_COMMIT_REF_NAME/$CI_COMMIT_REF_NAME/g" deployment.yaml
+    - sed -i "s/CI_COMMIT_SHORT_SHA/$CI_COMMIT_SHORT_SHA/g" deployment.yaml
+    - cat deployment.yaml
+    - kubectl -n CI_COMMIT_REF_NAME apply -f deployment.yaml
+  when: manual
+  only:
+    - production
+    - qa
