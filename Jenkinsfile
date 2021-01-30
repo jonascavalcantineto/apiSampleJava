@@ -1,10 +1,12 @@
 #!groovy
 
-node("master") {
-
-    // def javaHome = tool 'java11'
-    // env.PATH = "${env.PATH}:~/.local/bin:${javaHome}/bin"
-    // env.JAVA_HOME = "${javaHome}"
+pipeline {
+    agent {
+        docker {
+            image 'maven:3-alpine'
+            args '-v /root/.m2:/root/.m2'
+        }
+    }
 
     def branch = getGitBranchName()
     if(branch == "*/master")
