@@ -1,6 +1,8 @@
 #!groovy
 
-node("master"){
+pipeline { 
+    
+    agent any 
 
     def branch = getGitBranchName()
     if(branch == "*/master")
