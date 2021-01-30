@@ -1,10 +1,10 @@
 #!groovy
 
-node("java11") {
+node("master") {
 
-    def javaHome = tool 'java11'
-    env.PATH = "${env.PATH}:~/.local/bin:${javaHome}/bin"
-    env.JAVA_HOME = "${javaHome}"
+    // def javaHome = tool 'java11'
+    // env.PATH = "${env.PATH}:~/.local/bin:${javaHome}/bin"
+    // env.JAVA_HOME = "${javaHome}"
 
     def branch = getGitBranchName()
     if(branch == "*/master")
@@ -25,7 +25,7 @@ node("java11") {
     echo "projectEnv setted: ${projectEnv}"
 
     def projectName = "apisample"
-    def registry = "https://registry.intranet.pagseguro.uol"
+    def registry = ""
 
     
     try {
