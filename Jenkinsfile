@@ -12,25 +12,13 @@ node("master") {
     else if (branch == "*/qa")
         branch = "qa" 
 
-    echo "projectEnv: ${projectEnv}"
     echo "branch: ${branch}"
-
-    if (projectEnv == " " || projectEnv == null){
-        if (branch == "master" || branch == "prod")
-            projectEnv = "prod"
-        else 
-            projectEnv = "qa"
-    }
-
-    echo "projectEnv setted: ${projectEnv}"
 
     def projectName = "apisample"
     def registry = ""
 
     
     try {
-    
-        deleteDir()
        
         def mvn = "./mvnw"
         
