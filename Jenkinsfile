@@ -1,10 +1,8 @@
 #!groovy
 
-node("java11") {
-
-    def javaHome = tool 'java11'
-    env.PATH = "${env.PATH}:~/.local/bin:${javaHome}/bin"
-    env.JAVA_HOME = "${javaHome}"
+pipeline { 
+    
+    agent any 
 
     def branch = getGitBranchName()
     if(branch == "*/master")
@@ -12,45 +10,31 @@ node("java11") {
     else if (branch == "*/qa")
         branch = "qa" 
 
-    echo "projectEnv: ${projectEnv}"
     echo "branch: ${branch}"
 
-    if (projectEnv == " " || projectEnv == null){
-        if (branch == "master" || branch == "prod")
-            projectEnv = "prod"
-        else 
-            projectEnv = "qa"
-    }
-
-    echo "projectEnv setted: ${projectEnv}"
-
     def projectName = "apisample"
-    def registry = "https://registry.intranet.pagseguro.uol"
+    def registry = ""
 
     
     try {
-    
-        deleteDir()
-       
-        def mvn = "./mvnw"
-        
+           
         stage(name: "checkout") {
             checkout scm
         }
 
         stage(name: "build") {
-            sh "${mvn} clean install -DskipTests"
+            sh "mvn clean install -DskipTests"
         }
 
         stage(name: "test") {
-            sh "${mvn} test"
+            sh "mvn test"
             
             step([$class: "JUnitResultArchiver", testResults: "**/build/test-results/test/TEST-*.xml"])
         }
 
         stage(name: "release") {
-            tagVersion = getVersionGenerateRelease(branch)
-            generateDockerBuild(projectGroup, projectName, registry, tagVersion)
+            // tagVersion = getVersionGenerateRelease(branch)
+            // generateDockerBuild(projectGroup, projectName, registry, tagVersion)
         }
 
         stage(name: "deploy") {
