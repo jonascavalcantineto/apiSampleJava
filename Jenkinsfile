@@ -1,12 +1,6 @@
 #!groovy
 
-pipeline {
-    agent {
-        docker {
-            image 'maven:3-alpine'
-            args '-v /root/.m2:/root/.m2'
-        }
-    }
+node("master"){
 
     def branch = getGitBranchName()
     if(branch == "*/master")
@@ -21,26 +15,24 @@ pipeline {
 
     
     try {
-       
-        def mvn = "./mvnw"
-        
+           
         stage(name: "checkout") {
             checkout scm
         }
 
         stage(name: "build") {
-            sh "${mvn} clean install -DskipTests"
+            sh "mvn clean install -DskipTests"
         }
 
         stage(name: "test") {
-            sh "${mvn} test"
+            sh "mvn test"
             
             step([$class: "JUnitResultArchiver", testResults: "**/build/test-results/test/TEST-*.xml"])
         }
 
         stage(name: "release") {
-            tagVersion = getVersionGenerateRelease(branch)
-            generateDockerBuild(projectGroup, projectName, registry, tagVersion)
+            // tagVersion = getVersionGenerateRelease(branch)
+            // generateDockerBuild(projectGroup, projectName, registry, tagVersion)
         }
 
         stage(name: "deploy") {
