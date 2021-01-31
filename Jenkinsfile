@@ -39,7 +39,7 @@ node {
                     usernameVariable: 'USERNAME',
                     passwordVariable: 'PASSWORD')]) {
 
-             generateDockerBuild(projectName, registry, branch,$USERNAME,$PASSWORD)
+             generateDockerBuild(projectName, registry, branch,USERNAME,PASSWORD)
           }
            
         }
