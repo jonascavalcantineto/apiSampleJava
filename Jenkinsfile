@@ -14,7 +14,7 @@ node {
     echo "branch: ${branch}"
 
     def projectName = "apisample"
-    def registry = ""
+    def registry = "docker.io/jonascavalcantineto"
 
     
     try {
@@ -30,16 +30,15 @@ node {
         stage(name: "test") {
             sh "${mvn} test"
             
-            step([$class: "JUnitResultArchiver", testResults: "**/build/test-results/test/TEST-*.xml"])
+            step([$class: "JUnitResultArchiver", allowEmptyResults: true, testResults: "**/build/test-results/test/TEST-*.xml"])
         }
 
         stage(name: "release") {
-            // tagVersion = getVersionGenerateRelease(branch)
-            // generateDockerBuild(projectGroup, projectName, registry, tagVersion)
+            generateDockerBuild(projectName, registry, branch)
         }
 
         stage(name: "deploy") {
-
+            deploy(branch)
         }
 
     } catch (Exception e) {
@@ -51,10 +50,10 @@ def getGitBranchName() {
     return scm.branches[0].name
 }
 
-def generateDockerBuild(projectGroup, projectName, registry, tagVersion) {
-    
-    app = docker.build("${projectGroup}/${projectName}", ".")
-    docker.withRegistry("${registry}", "svcacc_ps_jenkins") {
-        app.push(tagVersion)
-    }
+def generateDockerBuild(projectName, registry,branch) {
+    sh "echo docker build ${registry}/${projectName}:${branch}"
+}
+
+def deploy(branch){
+    sh "echo kubectl -n ${branch} apply -f deploy.yaml"
 }
