@@ -34,14 +34,21 @@ node {
         }
 
         stage(name: "release-image") {
-             withCredentials([
-                usernamePassword(credentialsId: 'docker-credentials',
-                    usernameVariable: 'USERNAME',
-                    passwordVariable: 'PASSWORD')]) {
+        //      withCredentials([
+        //         usernamePassword(credentialsId: 'docker-credentials',
+        //             usernameVariable: 'USERNAME',
+        //             passwordVariable: 'PASSWORD')]) {
 
-             generateDockerBuild(projectName, registry, branch,USERNAME,PASSWORD)
-          }
-           
+        //      generateDockerBuild(projectName, registry, branch,docker,user,pass)
+        //   }
+            docker.withRegistry(registry, 'docker-credentials') {
+
+                def customImage = docker.build("${projectName}:${branch}")
+
+                /* Push the container to the custom Registry */
+                customImage.push()
+            }
+            //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
         }
 
         stage(name: "deploy") {
@@ -57,9 +64,18 @@ def getGitBranchName() {
     return scm.branches[0].name
 }
 
-def generateDockerBuild(projectName, registry,branch, user, pass) {
+def generateDockerBuild(projectName, registry,branch, docker, credentialsId) {
     sh "docker login -u user -p pass"
     sh "echo docker build ${registry}/${projectName}:${branch}"
+
+    docker.withRegistry(registry, credentialsId) {
+
+        def customImage = docker.build("${projectName}:${branch}")
+
+        /* Push the container to the custom Registry */
+        customImage.push()
+    }
+
 }
 
 def deploy(branch){
