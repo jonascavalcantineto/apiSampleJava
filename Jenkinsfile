@@ -35,10 +35,10 @@ node {
 
         stage(name: "release-image") {
             //docker.image("jonascavalcantineto/${projectName}:${branch}").pull()
-            def customImage = docker.build("jonascavalcantineto/${projectName}:${branch}")
+            docker.build("jonascavalcantineto/${projectName}:${branch}")
 
             // /* Push the container to the custom Registry */
-            customImage.push()
+            //customImage.push()
            
             //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
         }
