@@ -41,7 +41,7 @@ node {
 
         //      generateDockerBuild(projectName, registry, branch,docker,user,pass)
         //   }
-            docker.withRegistry(registry, 'docker-credentials') {
+             docker.withTool('docker') {
 
                 def customImage = docker.build("jonascavalcantineto/${projectName}:${branch}")
 
