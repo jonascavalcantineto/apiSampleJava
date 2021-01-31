@@ -41,7 +41,7 @@ node {
             // }
             sh "echo $PATH"
             sh "export PATH=$PATH:$DOCKER_HOME"
-            sh "which docker"
+            
             sh "docker ps"
             docker.withRegistry(registry, 'dockerhub') {
                 docker.build("jonascavalcantineto/${projectName}:${branch}").push()
