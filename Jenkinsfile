@@ -5,7 +5,7 @@ node {
     def mvnHome = tool name: 'maven', type: 'maven'
     def mvn = "${mvnHome}/bin/mvn"
     DOCKER_HOME = tool "docker"
-    def docker = "$DOCKER_HOME/docker"
+    def docker = "$DOCKER_HOME"
 
     def branch = getGitBranchName()
     if(branch == "*/master")
