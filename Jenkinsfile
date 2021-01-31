@@ -2,7 +2,8 @@
 
 node { 
     
-    agent any 
+    def mvnHome = tool name: 'maven', type: 'maven'
+    def mvn = "${mvnHome}/bin/mvn"
 
     def branch = getGitBranchName()
     if(branch == "*/master")
@@ -23,11 +24,11 @@ node {
         }
 
         stage(name: "build") {
-            sh "mvn clean install -DskipTests"
+            sh "${mvn} clean install -DskipTests"
         }
 
         stage(name: "test") {
-            sh "mvn test"
+            sh "${mvn} test"
             
             step([$class: "JUnitResultArchiver", testResults: "**/build/test-results/test/TEST-*.xml"])
         }
