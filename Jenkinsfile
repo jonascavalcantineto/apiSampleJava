@@ -35,13 +35,13 @@ node {
         }
 
         stage(name: "release-image") {
-            dir('.') {
+            // dir('.') {
+            //     docker.build("jonascavalcantineto/${projectName}:${branch}").push()
+            // }
+            docker.withRegistry(registry, 'dockerhub') {
                 docker.build("jonascavalcantineto/${projectName}:${branch}").push()
-            }
-            // docker.withRegistry(registry, 'dockerhub') {
-
                 
-            // }   
+            }   
             //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
         }
 
