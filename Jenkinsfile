@@ -34,20 +34,12 @@ node {
         }
 
         stage(name: "release-image") {
-        //      withCredentials([
-        //         usernamePassword(credentialsId: 'docker-credentials',
-        //             usernameVariable: 'USERNAME',
-        //             passwordVariable: 'PASSWORD')]) {
+      
+            def customImage = docker.build("jonascavalcantineto/${projectName}:${branch}")
 
-        //      generateDockerBuild(projectName, registry, branch,docker,user,pass)
-        //   }
-             docker.withTool('docker') {
-
-                def customImage = docker.build("jonascavalcantineto/${projectName}:${branch}")
-
-                /* Push the container to the custom Registry */
-                customImage.push()
-            }
+            /* Push the container to the custom Registry */
+            customImage.push()
+           
             //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
         }
 
