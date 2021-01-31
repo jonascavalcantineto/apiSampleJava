@@ -33,8 +33,15 @@ node {
             step([$class: "JUnitResultArchiver", allowEmptyResults: true, testResults: "**/build/test-results/test/TEST-*.xml"])
         }
 
-        stage(name: "release") {
-            generateDockerBuild(projectName, registry, branch)
+        stage(name: "release-image") {
+             withCredentials([
+                usernamePassword(credentialsId: 'docker-credentials',
+                    usernameVariable: 'USERNAME',
+                    passwordVariable: 'PASSORD')]) {
+
+             generateDockerBuild(projectName, registry, branch,user,pass)
+          }
+           
         }
 
         stage(name: "deploy") {
@@ -50,7 +57,8 @@ def getGitBranchName() {
     return scm.branches[0].name
 }
 
-def generateDockerBuild(projectName, registry,branch) {
+def generateDockerBuild(projectName, registry,branch, user, pass) {
+    sh "docker login -u user -p pass"
     sh "echo docker build ${registry}/${projectName}:${branch}"
 }
 
