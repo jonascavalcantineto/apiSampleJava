@@ -3,8 +3,6 @@
 node { 
     
 
-    agent any;
-    
     def mvnHome = tool name: 'maven', type: 'maven'
     def mvn = "${mvnHome}/bin/mvn"
 
