@@ -14,7 +14,7 @@ node {
     echo "branch: ${branch}"
 
     def projectName = "apisample"
-    def registry = "https://docker.io/jonascavalcantineto/"
+    def registry = "https://docker.io"
 
     
     try {
@@ -43,7 +43,7 @@ node {
         //   }
             docker.withRegistry(registry, 'docker-credentials') {
 
-                def customImage = docker.build("${projectName}:${branch}")
+                def customImage = docker.build("jonascavalcantineto/${projectName}:${branch}")
 
                 /* Push the container to the custom Registry */
                 customImage.push()
