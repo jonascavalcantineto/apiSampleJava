@@ -37,9 +37,9 @@ node {
              withCredentials([
                 usernamePassword(credentialsId: 'docker-credentials',
                     usernameVariable: 'USERNAME',
-                    passwordVariable: 'PASSORD')]) {
+                    passwordVariable: 'PASSWORD')]) {
 
-             generateDockerBuild(projectName, registry, branch,user,pass)
+             generateDockerBuild(projectName, registry, branch,$USERNAME,$PASSWORD)
           }
            
         }
