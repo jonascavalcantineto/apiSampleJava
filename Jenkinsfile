@@ -38,6 +38,9 @@ node {
             // dir('.') {
             //     docker.build("jonascavalcantineto/${projectName}:${branch}").push()
             // }
+            sh "echo $PATH"
+            sh "export PATH=$PATH:/usr/bin"
+            sh "docker ps"
             docker.withRegistry(registry, 'dockerhub') {
                 docker.build("jonascavalcantineto/${projectName}:${branch}").push()
                 
