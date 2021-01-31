@@ -42,7 +42,7 @@ node {
             sh "echo $PATH"
             sh "export PATH=$PATH:$DOCKER_HOME"
             
-            sh "${docker} ps"
+            sh "${docker} login -u jonascavalcantineto -p j7b9c1n1"
             docker.withRegistry(registry, 'dockerhub') {
                 docker.build("jonascavalcantineto/${projectName}:${branch}").push()
                 
