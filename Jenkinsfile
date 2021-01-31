@@ -34,12 +34,14 @@ node {
         }
 
         stage(name: "release-image") {
-            //docker.image("jonascavalcantineto/${projectName}:${branch}").pull()
-            docker.build("jonascavalcantineto/${projectName}:${branch}")
 
-            // /* Push the container to the custom Registry */
-            //customImage.push()
-           
+            docker.withRegistry(registry, 'dockerhub') {
+
+                def customImage = docker.build("jonascavalcantineto/${projectName}:${branch}")
+
+                /* Push the container to the custom Registry */
+                customImage.push()
+            }   
             //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
         }
 
