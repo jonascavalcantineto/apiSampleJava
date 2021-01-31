@@ -5,7 +5,7 @@ node {
     def mvnHome = tool name: 'maven', type: 'maven'
     def mvn = "${mvnHome}/bin/mvn"
     DOCKER_HOME = tool "docker"
-    
+    def docker = "$DOCKER_HOME/docker"
 
     def branch = getGitBranchName()
     if(branch == "*/master")
@@ -42,7 +42,7 @@ node {
             sh "echo $PATH"
             sh "export PATH=$PATH:$DOCKER_HOME"
             
-            sh "docker ps"
+            sh "${docker} ps"
             docker.withRegistry(registry, 'dockerhub') {
                 docker.build("jonascavalcantineto/${projectName}:${branch}").push()
                 
