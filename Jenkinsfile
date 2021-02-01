@@ -37,7 +37,7 @@ node {
 
         stage(name: "release-image") {
             agent {
-                docker { image 'docker-dind' }
+                docker-agent { image 'docker-dind' }
             }
             steps {
                 docker.withRegistry(registry, 'dockerhub') {
