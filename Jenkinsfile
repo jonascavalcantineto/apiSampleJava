@@ -4,8 +4,6 @@ node {
     
     def mvnHome = tool name: 'maven', type: 'maven'
     def mvn = "${mvnHome}/bin/mvn"
-    // DOCKER_HOME = tool "docker"
-    // def docker = "$DOCKER_HOME"
 
     def branch = getGitBranchName()
     if(branch == "*/master")
@@ -39,8 +37,7 @@ node {
             docker.withRegistry(registry, 'dockerhub') {
                 docker.build("jonascavalcantineto/${projectName}:${branch}").push()
             }   
-            
-            //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
+              
         }
 
         stage(name: "deploy") {
@@ -56,20 +53,8 @@ def getGitBranchName() {
     return scm.branches[0].name
 }
 
-def generateDockerBuild(projectName, registry,branch, docker, credentialsId) {
-    sh "docker login -u user -p pass"
-    sh "echo docker build ${registry}/${projectName}:${branch}"
-
-    docker.withRegistry(registry, credentialsId) {
-
-        def customImage = docker.build("${projectName}:${branch}")
-
-        /* Push the container to the custom Registry */
-        customImage.push()
-    }
-
-}
 
 def deploy(branch){
     sh "echo kubectl -n ${branch} apply -f deploy.yaml"
+    SH "kubectl get pods --all-namespaces"
 }
