@@ -1,8 +1,11 @@
 #!groovy
 
-pipeline { 
+node { 
     
-    agent any 
+    def mvnHome = tool name: 'maven', type: 'maven'
+    def mvn = "${mvnHome}/bin/mvn"
+    // DOCKER_HOME = tool "docker"
+    // def docker = "$DOCKER_HOME"
 
     def branch = getGitBranchName()
     if(branch == "*/master")
@@ -13,32 +16,41 @@ pipeline {
     echo "branch: ${branch}"
 
     def projectName = "apisample"
-    def registry = ""
+    def registry = "https://docker.io"
 
     
     try {
-           
+        
         stage(name: "checkout") {
             checkout scm
         }
 
         stage(name: "build") {
-            sh "mvn clean install -DskipTests"
+            sh "${mvn} clean install -DskipTests"
         }
 
         stage(name: "test") {
-            sh "mvn test"
+            sh "${mvn} test"
             
-            step([$class: "JUnitResultArchiver", testResults: "**/build/test-results/test/TEST-*.xml"])
+            step([$class: "JUnitResultArchiver", allowEmptyResults: true, testResults: "**/build/test-results/test/TEST-*.xml"])
         }
 
-        stage(name: "release") {
-            // tagVersion = getVersionGenerateRelease(branch)
-            // generateDockerBuild(projectGroup, projectName, registry, tagVersion)
+        stage(name: "release-image") {
+            agent { label 'docker'}
+            steps {
+                sh "docker build -f Dockerfile -t ${REPO}:${COMMIT} ./"
+            }
+   
+            // docker.withRegistry(registry, 'dockerhub') {
+            //     docker.build("jonascavalcantineto/${projectName}:${branch}").push()
+            
+            //}   
+            
+            //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
         }
 
         stage(name: "deploy") {
-
+            deploy(branch)
         }
 
     } catch (Exception e) {
@@ -50,10 +62,20 @@ def getGitBranchName() {
     return scm.branches[0].name
 }
 
-def generateDockerBuild(projectGroup, projectName, registry, tagVersion) {
-    
-    app = docker.build("${projectGroup}/${projectName}", ".")
-    docker.withRegistry("${registry}", "svcacc_ps_jenkins") {
-        app.push(tagVersion)
+def generateDockerBuild(projectName, registry,branch, docker, credentialsId) {
+    sh "docker login -u user -p pass"
+    sh "echo docker build ${registry}/${projectName}:${branch}"
+
+    docker.withRegistry(registry, credentialsId) {
+
+        def customImage = docker.build("${projectName}:${branch}")
+
+        /* Push the container to the custom Registry */
+        customImage.push()
     }
+
+}
+
+def deploy(branch){
+    sh "echo kubectl -n ${branch} apply -f deploy.yaml"
 }
