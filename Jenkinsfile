@@ -36,15 +36,9 @@ node {
         }
 
         stage(name: "release-image") {
-            agent { label 'docker'}
-            steps {
-                sh "docker build -f Dockerfile -t ${REPO}:${COMMIT} ./"
-            }
-   
-            // docker.withRegistry(registry, 'dockerhub') {
-            //     docker.build("jonascavalcantineto/${projectName}:${branch}").push()
-            
-            //}   
+            docker.withRegistry(registry, 'dockerhub') {
+                docker.build("jonascavalcantineto/${projectName}:${branch}").push()
+            }   
             
             //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
         }
