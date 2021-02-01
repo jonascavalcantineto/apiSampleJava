@@ -4,8 +4,8 @@ node {
     
     def mvnHome = tool name: 'maven', type: 'maven'
     def mvn = "${mvnHome}/bin/mvn"
-    DOCKER_HOME = tool "docker"
-    def docker = "$DOCKER_HOME"
+    // DOCKER_HOME = tool "docker"
+    // def docker = "$DOCKER_HOME"
 
     def branch = getGitBranchName()
     if(branch == "*/master")
@@ -36,15 +36,11 @@ node {
         }
 
         stage(name: "release-image") {
-            agent {
-                docker-agent { image 'docker-dind' }
-            }
-            steps {
-                docker.withRegistry(registry, 'dockerhub') {
-                    docker.build("jonascavalcantineto/${projectName}:${branch}").push()
-                
-                }   
-            }
+   
+            docker.withRegistry(registry, 'dockerhub') {
+                docker.build("jonascavalcantineto/${projectName}:${branch}").push()
+            
+            }   
             
             //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
         }
