@@ -1,61 +1,61 @@
 #!groovy
+pipeline {
+    node { 
+        
+        def mvnHome = tool name: 'maven', type: 'maven'
+        def mvn = "${mvnHome}/bin/mvn"
+        DOCKER_HOME = tool "docker"
+        def docker = "$DOCKER_HOME"
 
-node { 
-    
-    def mvnHome = tool name: 'maven', type: 'maven'
-    def mvn = "${mvnHome}/bin/mvn"
-    DOCKER_HOME = tool "docker"
-    def docker = "$DOCKER_HOME"
+        def branch = getGitBranchName()
+        if(branch == "*/master")
+            branch = "prod" 
+        else if (branch == "*/qa")
+            branch = "qa" 
 
-    def branch = getGitBranchName()
-    if(branch == "*/master")
-        branch = "prod" 
-    else if (branch == "*/qa")
-        branch = "qa" 
+        echo "branch: ${branch}"
 
-    echo "branch: ${branch}"
+        def projectName = "apisample"
+        def registry = "https://docker.io"
 
-    def projectName = "apisample"
-    def registry = "https://docker.io"
-
-    
-    try {
-           
-        stage(name: "checkout") {
-            checkout scm
-        }
-
-        stage(name: "build") {
-            sh "${mvn} clean install -DskipTests"
-        }
-
-        stage(name: "test") {
-            sh "${mvn} test"
+        
+        try {
             
-            step([$class: "JUnitResultArchiver", allowEmptyResults: true, testResults: "**/build/test-results/test/TEST-*.xml"])
-        }
+            stage(name: "checkout") {
+                checkout scm
+            }
 
-        stage(name: "release-image") {
-            // dir('.') {
-            //     docker.build("jonascavalcantineto/${projectName}:${branch}").push()
-            // }
-            sh "echo $PATH"
-            sh "export PATH=$PATH:$DOCKER_HOME"
-            
-            sh "${docker} login -u jonascavalcantineto -p j7b9c1n1"
-            docker.withRegistry(registry, 'dockerhub') {
-                docker.build("jonascavalcantineto/${projectName}:${branch}").push()
+            stage(name: "build") {
+                sh "${mvn} clean install -DskipTests"
+            }
+
+            stage(name: "test") {
+                sh "${mvn} test"
                 
-            }   
-            //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
-        }
+                step([$class: "JUnitResultArchiver", allowEmptyResults: true, testResults: "**/build/test-results/test/TEST-*.xml"])
+            }
 
-        stage(name: "deploy") {
-            deploy(branch)
-        }
+            stage(name: "release-image") {
+                agent {
+                    docker { image 'docker-dind' }
+                }
+                steps {
+                    docker.withRegistry(registry, 'dockerhub') {
+                        docker.build("jonascavalcantineto/${projectName}:${branch}").push()
+                    
+                    }   
+                }
+                
+                //generateDockerBuild(projectName, registry, branch,docker,'docker-credentials')     
+            }
 
-    } catch (Exception e) {
-        throw e
+            stage(name: "deploy") {
+                deploy(branch)
+            }
+
+        } catch (Exception e) {
+            throw e
+        }
     }
 }
 
