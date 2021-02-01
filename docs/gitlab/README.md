@@ -2,4 +2,4 @@
 
 ### Architecture
 
-![GitLab Pipeline](GiTLab-CICD-Pipeline.png)
+![GitLab Pipeline](https://github.com/jonascavalcantineto/apiSampleJava/blob/master/docs/github/GiTLab-CICD-Pipeline.png)
