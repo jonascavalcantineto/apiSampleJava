@@ -56,5 +56,5 @@ def getGitBranchName() {
 
 def deploy(branch){
     sh "echo kubectl -n ${branch} apply -f deploy.yaml"
-    SH "kubectl get pods --all-namespaces"
+    sh "kubectl get pods --all-namespaces"
 }
