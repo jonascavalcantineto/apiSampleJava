@@ -58,8 +58,11 @@ def getGitBranchName() {
 
 def generateDockerBuild(projectGroup, projectName, registry, tagVersion) {
     
-    app = docker.build("${projectGroup}/${projectName}", ".")
     docker.withRegistry("${registry}", "dockerhub") {
+        sh "echo Building"
+        def app = docker.build("${projectGroup}/${projectName}")
+
+        sh "echo Pushing"
         app.push(tagVersion)
     }
 }
