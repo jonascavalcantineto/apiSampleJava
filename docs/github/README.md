@@ -2,4 +2,4 @@
 
 ### Architecture
 
-![GitHub Pipeline](./GiHub-CICD-Pipeline.png)
+![GitHub Pipeline](https://github.com/jonascavalcantineto/apiSampleJava/docs/github/GiHub-CICD-Pipeline.png)
