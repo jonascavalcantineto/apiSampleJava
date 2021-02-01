@@ -13,6 +13,7 @@ node {
 
     echo "branch: ${branch}"
 
+    def projectGroup = "jonascavalcantineto"
     def projectName = "apisample"
     def registry = "https://docker.io"
 
@@ -34,9 +35,11 @@ node {
         }
 
         stage(name: "release-image") {
-            docker.withRegistry(registry, 'dockerhub') {
-                docker.build("jonascavalcantineto/${projectName}:${branch}").push()
-            }   
+            // docker.withRegistry(registry, 'dockerhub') {
+            //     docker.build("jonascavalcantineto/${projectName}:${branch}").push()
+            // } 
+
+            generateDockerBuild(projectGroup, projectName, registry, branch)  
               
         }
 
@@ -53,6 +56,13 @@ def getGitBranchName() {
     return scm.branches[0].name
 }
 
+def generateDockerBuild(projectGroup, projectName, registry, tagVersion) {
+    
+    app = docker.build("${projectGroup}/${projectName}", ".")
+    docker.withRegistry("${registry}", "dockerhub") {
+        app.push(tagVersion)
+    }
+}
 
 def deploy(branch){
     sh "echo kubectl -n ${branch} apply -f deploy.yaml"
