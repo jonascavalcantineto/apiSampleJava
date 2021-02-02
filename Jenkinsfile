@@ -61,8 +61,7 @@ def generateDockerBuild(projectGroup, projectName, registry, tagVersion) {
 
 def deploy(branch,projectName){
     sh "echo Doing Deploy on Kubernetes in ${branch} environment"
-    sh "kubectl get pods --all-namespaces"
-    sh "sed -i 's/CI_PROJECT_NAME/${projectName}/g' deployment.yaml"
+    sh "sed -i 's/CI_PROJECT_NAME/${projectName}/g' deploy.yaml"
     sh "sed -i 's/CI_COMMIT_REF_NAME/${branch}/g' deploy.yaml"
     sh "kubectl -n ${branch} apply -f deploy.yaml"
     sh "kubectl rollout status deployment ${projectName}"
