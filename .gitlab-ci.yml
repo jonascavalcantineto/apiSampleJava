@@ -1,53 +1,58 @@
 image: maven:3.6.3-openjdk-8 
 
-variables:
-  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
-  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
-
-cache:
-  paths:
-    - .m2/repository/
-    - target/
-
 stages:
   - test
-  - image
+  - build
+  - tag
   - deploy
 
 code test:
   stage: test
   script:
-    - mvn $MAVEN_CLI_OPTS test
+    - mvn clean test
+  only:
+    - qa
 
 build:
-  stage: image
+  stage: build
   image: docker:18.09.7
   services:
   - docker:18.09.7-dind
   script:
-    - sed -i "s/CI_COMMIT_REF_NAME/$CI_COMMIT_REF_NAME/g" Dockerfile
     - docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD
-    - docker build -t $REGISTRY_HOST/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME .
-    - docker push $REGISTRY_HOST/$CI_PROJECT_NAME:$CI_COMMIT_REF_NAME
+    - docker build -t $REGISTRY_HOST/apisamplejava:$CI_COMMIT_REF_NAME .
+    - docker push $REGISTRY_HOST/apisamplejava:$CI_COMMIT_REF_NAME
   only:
     - qa
+
+tag:
+  stage: tag
+  image: docker:18.09.7
+  services:
+  - docker:18.09.7-dind
+  script:
+    - docker login -u $REGISTRY_USERNAME -p $REGISTRY_PASSWORD
+    - docker pull $REGISTRY_HOST/apisamplejava:qa
+    - docker tag $REGISTRY_HOST/apisamplejava:qa $REGISTRY_HOST/apisamplejava:$CI_COMMIT_REF_NAME
+    - docker push $REGISTRY_HOST/apisamplejava:$CI_COMMIT_REF_NAME
+  only:
     - production
-    
+
 deploy:
   stage: deploy
   image: dtzar/helm-kubectl
   script:
     - apk add --update coreutils
     - kubectl config set-cluster k8s --server=$KUBE_URL --certificate-authority=$KUBE_CA_PEM_FILE
-    - kubectl config set-credentials gitlab --token=$kube_sa_deploy_admin_prod_token
+    - if [ $CI_COMMIT_REF_NAME == "qa" ]; then TOKEN=$kube_sa_deploy_admin_qa_token; else TOKEN=$kube_sa_deploy_admin_production_token; fi
+    - kubectl config set-credentials gitlab --token=$TOKEN
     - kubectl config set-context default --cluster=k8s --user=gitlab
     - kubectl config use-context default
-    - sed -i "s/CI_PROJECT_NAME/$CI_PROJECT_NAME/g" deployment.yaml
-    - sed -i "s/CI_COMMIT_REF_NAME/$CI_COMMIT_REF_NAME/g" deployment.yaml
-    - sed -i "s/CI_COMMIT_SHORT_SHA/$CI_COMMIT_SHORT_SHA/g" deployment.yaml
-    - cat deployment.yaml
-    - kubectl -n CI_COMMIT_REF_NAME apply -f deployment.yaml
-  when: manual
+    - sed -i "s/CI_PROJECT_NAME/apisamplejava/g" deploy.yaml
+    - sed -i "s/CI_COMMIT_REF_NAME/$CI_COMMIT_REF_NAME/g" deploy.yaml
+    - sed -i "s/CI_COMMIT_SHORT_SHA/$CI_COMMIT_SHORT_SHA/g" deploy.yaml
+    - cat deploy.yaml
+    - kubectl -n $CI_COMMIT_REF_NAME apply -f deploy.yaml
   only:
     - production
     - qa
