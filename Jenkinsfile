@@ -6,8 +6,8 @@ node {
     def mvn = "${mvnHome}/bin/mvn"
 
     def branch = getGitBranchName()
-    if(branch == "*/master")
-        branch = "prod" 
+    if(branch == "*/production")
+        branch = "production" 
     else if (branch == "*/qa")
         branch = "qa" 
 
