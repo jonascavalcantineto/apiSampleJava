@@ -14,7 +14,7 @@ node {
     echo "branch: ${branch}"
 
     def projectGroup = "jonascavalcantineto"
-    def projectName = "apisample"
+    def projectName = "apisamplejava"
     def registry = "https://docker.io"
 
     
