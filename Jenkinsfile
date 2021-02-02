@@ -64,5 +64,5 @@ def deploy(branch,projectName){
     sh "sed -i 's/CI_PROJECT_NAME/${projectName}/g' deploy.yaml"
     sh "sed -i 's/CI_COMMIT_REF_NAME/${branch}/g' deploy.yaml"
     sh "kubectl -n ${branch} apply -f deploy.yaml"
-    sh "kubectl rollout status deployment ${projectName}"
+    sh "kubectl -n ${branch} rollout status deployment ${projectName}"
 }
