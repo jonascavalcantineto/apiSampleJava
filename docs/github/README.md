@@ -1,6 +1,6 @@
 # Github Pipeline Solution
 
-Following the *Devops CAML* principle *(Culture, Automation, LeanIT, Measurement and Sharing)*
+Following the **Devops CAML** principle **(Culture, Automation, LeanIT, Measurement and Sharing)**
 
 **CULTURE**
 
@@ -60,7 +60,6 @@ Grafana (CPU metrics UI x Memory X Disk)
 
 ELK (Logs Management of all containers in the environment)
 
-
 **Providently from Infrastructure**
 
 Terraform (AWS Resource Generation) (Implementation)
@@ -85,19 +84,19 @@ Production: Branch that will be responsible for generating the deployment in the
 
 **Anatomy of Hotfix and Feature branches**
 
-hotfix / <user email> / <task number>
+hotfix / email / task
 
-feature / <user email> / <task number>
+feature / email / task
 
 **Github - Realization of the pipeline through the Jenkinsfile file**
 
-1. The following stages will be held
+The following stages will be held
 
     - Build
 
     System package construction
 
-    - test
+    - Test
 
      Conducting code tests
 
@@ -106,5 +105,5 @@ feature / <user email> / <task number>
      Construction of the container system image
 
     - Deploy
-    
+
      Deploy in an orchestrated Kubernetes container (EKS)
